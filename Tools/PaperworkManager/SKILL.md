@@ -1,147 +1,209 @@
 # /paperwork — Paperwork Management Skill
 
-Process scanned multi-page PDFs from a ScanSnap scanner, classify each page, track bills, and file documents to Google Drive.
+Process scanned multi-page PDFs from a ScanSnap 2500, triage documents interactively, track bills, and file everything to Google Drive. Learns vendor/sender patterns to auto-suggest filing over time.
 
 ## Trigger
 
-When the user says `/paperwork` or asks to process scanned documents, manage bills, or file paperwork.
+When the user says `/paperwork` or asks to process scanned documents, manage bills, triage paperwork, or file documents.
 
 ## Subcommands
 
-- `/paperwork process [path]` — Process a scanned PDF (split, classify, file)
+- `/paperwork triage` — Check scan inbox for new PDFs and triage them interactively
 - `/paperwork bills` — Show unpaid bills
-- `/paperwork pay <bill_id>` — Mark a bill as paid and file it
+- `/paperwork paid <bill_id>` — Mark a bill as paid and file it
 - `/paperwork config` — Show or edit folder mappings
-- `/paperwork status` — Show processing summary
+- `/paperwork rules` — Show learned vendor/sender filing rules
 
-## Workflow: Process a Scanned PDF
+## The Core Workflow
 
-When processing a PDF, follow these steps exactly:
+The user scans up to 50 pages at once on their ScanSnap 2500. The PDF lands in the scan inbox on Google Drive. At some point, they invoke `/paperwork triage` and we walk through every document together.
 
-### Step 1: Split the PDF
+### Step 1: Check the Inbox
 
-Run the PDF processor to split and extract text:
+Look for new PDFs in the scan folder:
+```
+~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Scans/Inbox/
+```
 
+If no PDFs found, tell the user the inbox is empty.
+
+### Step 2: Split the PDF
+
+For each PDF in the inbox, run:
 ```bash
 bash ~/Personal_AI_Infrastructure/Tools/PaperworkManager/pdf-processor.sh "<pdf_path>" "<working_dir>"
 ```
 
-This creates individual page PDFs and text files in the working directory.
+This splits into individual page PDFs and extracts text from each page.
 
-### Step 2: Classify Each Page
+### Step 3: Read and Classify Each Page
 
-For each extracted page, read the text file and classify the document into one of these categories:
+For each page, read the extracted text file and determine:
 
-| Category | Description | Examples |
-|----------|-------------|----------|
-| `bills` | Something that requires payment | Utility bills, credit card statements, invoices |
-| `tax` | Tax-related documents | W-2s, 1099s, tax notices, property tax |
-| `medical` | Medical records or bills | EOBs, lab results, prescriptions |
-| `insurance` | Insurance documents | Policy docs, claims, coverage letters |
-| `receipts` | Proof of purchase | Store receipts, online order confirmations |
-| `personal` | Personal documents | Letters, cards, personal correspondence |
-| `correspondence` | Official correspondence | Government letters, legal notices, bank letters |
-| `warranties` | Product documentation | Warranties, manuals, registration cards |
-| `misc` | Anything else | Flyers, misc papers |
+1. **Vendor/Sender** — Who sent this? (e.g., "Con Edison", "Chase Bank", "IRS", "Dr. Smith")
+2. **Document type** — What kind of document is it?
+3. **Is it a bill that needs payment?**
+4. **Does it span multiple pages?** (look for "page 1 of 3", continuation headers, same sender on consecutive pages)
 
-For each page, determine:
-1. **Category** — Which folder it belongs in
-2. **Is it a bill?** — Does it require payment?
-3. **Description** — Brief summary (e.g., "Electric bill - March 2026")
-4. **Multi-page?** — Does this document span multiple pages? (look for continuation cues)
+**Check vendor rules first.** Read `~/.paperwork-manager/vendor-rules.json` — if the vendor has been seen before, use the learned category as the suggestion.
 
-### Step 3: Group Multi-Page Documents
+### Step 4: Group Multi-Page Documents
 
-If consecutive pages belong to the same document (e.g., a 3-page bank statement), merge them:
-
+If consecutive pages belong to the same document, merge them:
 ```bash
-bash ~/Personal_AI_Infrastructure/Tools/PaperworkManager/merge-pages.sh "output.pdf" "page-001.pdf" "page-002.pdf" "page-003.pdf"
+bash ~/Personal_AI_Infrastructure/Tools/PaperworkManager/merge-pages.sh "output.pdf" "page-001.pdf" "page-002.pdf"
 ```
 
-### Step 4: Handle Bills
+### Step 5: Triage Each Document Interactively
 
-For each document classified as a bill:
+For each document, present to the user:
 
-1. **Ask the user**: "This looks like a bill: [description]. Amount: $X. Does this need to be paid?"
-2. If YES, add to the bill tracker:
-   ```bash
-   bash ~/Personal_AI_Infrastructure/Tools/PaperworkManager/bill-tracker.sh add "<description>" "<amount>" "<due_date>" "<source_pdf>"
-   ```
-3. If NO (already paid or not applicable), proceed to filing.
+> **Document: [page X]**
+> **Vendor/Sender:** Con Edison
+> **Type:** Utility bill
+> **Amount due:** $142.37
+> **Due date:** April 15, 2026
+>
+> **Suggested action:** File to Bills/Unpaid, add to bill tracker
+> **Suggested category:** `bills_unpaid`
+> *(Based on: [vendor rule / AI classification])*
 
-### Step 5: File Documents
+Then ask:
+- "Does this need to be paid?" (if it's a bill)
+- "Where should I file this?" — suggest the category, let user confirm or override
 
-File each document to its mapped Google Drive folder:
+**Filing categories:**
 
+| Category | What goes here |
+|----------|---------------|
+| `bills_unpaid` | Bills waiting to be paid |
+| `bills_paid` | Bills after payment |
+| `receipts` | Receipts from paid bills, purchase receipts |
+| `tax_documents` | W-2s, 1099s, tax notices, property tax bills |
+| `bank_statements` | Bank and credit card statements |
+| `financial_statements` | Investment statements, retirement accounts, net worth docs |
+| `medical` | EOBs, lab results, prescriptions, medical bills |
+| `insurance` | Policy docs, claims, coverage letters |
+| `real_estate` | Mortgage docs, property records, HOA, deeds |
+| `employment` | Pay stubs, offer letters, employment verification |
+| `correspondence` | Government letters, legal notices, personal letters |
+| `warranties` | Product warranties, manuals, registration |
+| `misc` | Anything that doesn't fit above |
+
+### Step 6: Execute Filing
+
+For bills that need payment:
 ```bash
-bash ~/Personal_AI_Infrastructure/Tools/PaperworkManager/file-document.sh "<source_pdf>" "<target_folder>" "<descriptive_filename.pdf>"
+bash ~/Personal_AI_Infrastructure/Tools/PaperworkManager/bill-tracker.sh add "<vendor> - <description>" "<amount>" "<due_date>" "<source_pdf>"
+```
+Then file to `bills_unpaid`.
+
+For all documents:
+```bash
+bash ~/Personal_AI_Infrastructure/Tools/PaperworkManager/file-document.sh "<source_pdf>" "<target_folder>" "<YYYY-MM-DD_vendor_description.pdf>"
 ```
 
-Use descriptive filenames: `YYYY-MM-DD_description.pdf` (e.g., `2026-03-15_electric-bill.pdf`)
-
-The folder mappings are in:
+Folder mappings are in:
 ```
 ~/Personal_AI_Infrastructure/Tools/PaperworkManager/config.json
 ```
 
-### Step 6: Move Original to Processed
+### Step 7: Learn the Vendor Rule
 
-After all pages are classified and filed, move the original scan:
+After the user approves a filing, save the vendor → category mapping to `~/.paperwork-manager/vendor-rules.json`:
 
+```json
+{
+  "rules": [
+    {
+      "vendor": "Con Edison",
+      "keywords": ["con edison", "coned"],
+      "category": "bills_unpaid",
+      "is_bill": true,
+      "last_seen": "2026-03-28",
+      "times_seen": 1
+    }
+  ]
+}
+```
+
+Next time this vendor appears, auto-suggest the same category. Increment `times_seen` and update `last_seen`.
+
+### Step 8: Move Original to Processed
+
+After all pages are triaged and filed:
 ```bash
 mv "<original_pdf>" "<processed_folder>/"
 ```
 
-### Step 7: Summary
+### Step 9: Summary
 
-Present a summary:
+Present:
 - Total pages processed
-- Documents identified (with categories)
-- Bills added to tracker
+- Documents identified (vendor + type)
+- Bills added to tracker (with amounts and due dates)
 - Files saved to which folders
+- New vendor rules learned
 
-## Workflow: Manage Bills
+## Bill Lifecycle
+
+### 1. Bill arrives in scan → triage adds it to tracker + files to Bills/Unpaid
+### 2. User pays the bill offline
+### 3. User runs `/paperwork paid <bill_id>`
+
+When marking a bill as paid:
+```bash
+bash ~/Personal_AI_Infrastructure/Tools/PaperworkManager/bill-tracker.sh pay <bill_id>
+```
+
+Then move the PDF from Bills/Unpaid to Bills/Paid:
+```bash
+bash ~/Personal_AI_Infrastructure/Tools/PaperworkManager/bill-tracker.sh file <bill_id> "<bills_paid_folder>"
+```
+
+Also ask: "Do you have a receipt or confirmation for this payment?" If yes, file that to the Receipts folder.
 
 ### List unpaid bills
 ```bash
 bash ~/Personal_AI_Infrastructure/Tools/PaperworkManager/bill-tracker.sh list --unpaid
 ```
 
-### Mark a bill as paid
-```bash
-bash ~/Personal_AI_Infrastructure/Tools/PaperworkManager/bill-tracker.sh pay <bill_id>
-```
-
-Then file the paid bill:
-```bash
-bash ~/Personal_AI_Infrastructure/Tools/PaperworkManager/bill-tracker.sh file <bill_id> "<bills_folder>"
-```
-
-### Show all bills
+### List all bills
 ```bash
 bash ~/Personal_AI_Infrastructure/Tools/PaperworkManager/bill-tracker.sh list --all
+```
+
+## Vendor Rules System
+
+The system learns from every triage session. Rules are stored in `~/.paperwork-manager/vendor-rules.json`.
+
+- **First time seeing a vendor:** AI classifies, asks user to confirm, saves rule
+- **Subsequent times:** Auto-suggests based on saved rule, user can still override
+- **Override updates the rule:** If user changes the category, the rule is updated
+
+To view rules:
+```bash
+cat ~/.paperwork-manager/vendor-rules.json | jq '.rules[] | "\(.vendor) → \(.category) (seen \(.times_seen)x)"'
 ```
 
 ## Configuration
 
 Edit `~/Personal_AI_Infrastructure/Tools/PaperworkManager/config.json` to customize:
 
-- `scan_folder` — Where ScanSnap saves PDFs (Google Drive sync folder)
-- `processed_folder` — Where originals go after processing
-- `filing_folders` — Category → Google Drive folder mappings
-- `bill_tracker_path` — Location of the bills JSON database
+- `scan_folder` — Where ScanSnap saves PDFs
+- `processed_folder` — Where originals go after triage
+- `drives` — Personal and work Google Drive paths
+- `filing_folders` — Category → folder mappings
+- `vendor_rules_path` — Learned vendor rules database
+- `bill_tracker_path` — Bills JSON database
 
 ## Dependencies
 
-- `poppler-utils` — PDF splitting and text extraction (pdfseparate, pdfunite, pdftotext, pdfinfo)
-- `jq` — JSON processing for bill tracker
-- Google Drive for Desktop — Sync folders to local filesystem
+- `poppler-utils` — PDF splitting and text extraction
+- `jq` — JSON processing
+- Google Drive for Desktop — Local folder sync
 
-Install:
+Install on macOS:
 ```bash
-# macOS
 brew install poppler jq
-
-# Linux
-sudo apt install poppler-utils jq
 ```

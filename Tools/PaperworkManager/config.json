@@ -7,15 +7,20 @@
     "work": "~/Library/CloudStorage/GoogleDrive-jorsillo@tetrascience.com/My Drive"
   },
   "filing_folders": {
-    "bills": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Bills & Financial",
-    "tax": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Tax",
+    "bills_unpaid": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Bills/Unpaid",
+    "bills_paid": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Bills/Paid",
+    "receipts": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Receipts",
+    "tax_documents": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Tax",
+    "bank_statements": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Bank Statements",
+    "financial_statements": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Financial Statements",
     "medical": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Medical",
     "insurance": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Insurance",
-    "receipts": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Receipts",
-    "personal": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Personal",
+    "real_estate": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Real Estate",
+    "employment": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Employment",
     "correspondence": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Correspondence",
     "warranties": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Warranties & Manuals",
     "misc": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Misc"
   },
-  "bill_tracker_path": "~/.paperwork-manager/bills.json"
+  "bill_tracker_path": "~/.paperwork-manager/bills.json",
+  "vendor_rules_path": "~/.paperwork-manager/vendor-rules.json"
 }
