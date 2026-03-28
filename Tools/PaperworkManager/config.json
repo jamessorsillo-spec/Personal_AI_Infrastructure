@@ -1,17 +1,21 @@
 {
-  "scan_folder": "~/Google Drive/My Drive/Scans/Inbox",
-  "processed_folder": "~/Google Drive/My Drive/Scans/Processed",
+  "scan_folder": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Scans/Inbox",
+  "processed_folder": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Scans/Processed",
   "working_directory": "~/.paperwork-manager",
+  "drives": {
+    "personal": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive",
+    "work": "~/Library/CloudStorage/GoogleDrive-jorsillo@tetrascience.com/My Drive"
+  },
   "filing_folders": {
-    "bills": "~/Google Drive/My Drive/Documents/Bills & Financial",
-    "tax": "~/Google Drive/My Drive/Documents/Tax",
-    "medical": "~/Google Drive/My Drive/Documents/Medical",
-    "insurance": "~/Google Drive/My Drive/Documents/Insurance",
-    "receipts": "~/Google Drive/My Drive/Documents/Receipts",
-    "personal": "~/Google Drive/My Drive/Documents/Personal",
-    "correspondence": "~/Google Drive/My Drive/Documents/Correspondence",
-    "warranties": "~/Google Drive/My Drive/Documents/Warranties & Manuals",
-    "misc": "~/Google Drive/My Drive/Documents/Misc"
+    "bills": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Bills & Financial",
+    "tax": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Tax",
+    "medical": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Medical",
+    "insurance": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Insurance",
+    "receipts": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Receipts",
+    "personal": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Personal",
+    "correspondence": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Correspondence",
+    "warranties": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Warranties & Manuals",
+    "misc": "~/Library/CloudStorage/GoogleDrive-james.s.orsillo@gmail.com/My Drive/Documents/Misc"
   },
   "bill_tracker_path": "~/.paperwork-manager/bills.json"
 }
