@@ -36,13 +36,15 @@ load_config() {
         exit 1
     fi
 
-    TARGET_SSID=$(jq -r '.target_ssid' "$CONFIG_FILE")
+    TARGET_SSID=$(jq -r '.target_ssid // ""' "$CONFIG_FILE")
+    TARGET_ROUTER=$(jq -r '.target_router // ""' "$CONFIG_FILE")
     TAILSCALE_INSTANCE=$(jq -r '.tailscale_instance // "default"' "$CONFIG_FILE")
     TAILSCALE_UP_ARGS=$(jq -r '.tailscale_up_args // ""' "$CONFIG_FILE")
     TAILSCALE_CLI=$(jq -r '.tailscale_cli // "/Applications/Tailscale.app/Contents/MacOS/Tailscale"' "$CONFIG_FILE")
 
-    if [[ "$TARGET_SSID" == "null" || -z "$TARGET_SSID" ]]; then
-        echo "ERROR: target_ssid not set in config.json"
+    if [[ -z "$TARGET_ROUTER" ]]; then
+        echo "ERROR: target_router not set in config.json"
+        echo "Run: networksetup -getinfo Wi-Fi | grep Router"
         exit 1
     fi
 }
@@ -54,33 +56,50 @@ log() {
     echo "$msg"
 }
 
-# ── Get Current WiFi SSID (macOS) ─────────────────────────────────────
-get_current_ssid() {
-    local ssid=""
+# ── Get Current WiFi Router/Gateway IP ─────────────────────────────────
+# macOS redacts SSID without Location Services permission, so we identify
+# the target network by its gateway/router IP instead — this is reliable
+# and doesn't require any special permissions.
+get_current_router() {
+    local router=""
 
-    # Method 1: networksetup (most common)
-    local raw
-    raw=$(networksetup -getairportnetwork en0 2>/dev/null)
-    if [[ "$raw" == "Current Wi-Fi Network: "* ]]; then
-        ssid="${raw#Current Wi-Fi Network: }"
+    # Primary: networksetup -getinfo (works without Location Services)
+    router=$(networksetup -getinfo Wi-Fi 2>/dev/null | awk -F': ' '/^Router:/{print $2}')
+
+    # Fallback: route table
+    if [[ -z "$router" ]]; then
+        router=$(route -n get default 2>/dev/null | awk '/gateway:/{print $2}')
     fi
 
-    # Method 2: ipconfig getpacket (gets SSID from DHCP info)
-    if [[ -z "$ssid" ]]; then
-        ssid=$(ipconfig getsummary en0 2>/dev/null | awk -F': ' '/SSID :/{print $2}')
+    echo "$router"
+}
+
+# ── Check if on target network ─────────────────────────────────────────
+is_on_target_network() {
+    local current_router
+    current_router=$(get_current_router)
+
+    if [[ -z "$current_router" ]]; then
+        return 1  # not connected to any network
     fi
 
-    # Method 3: system_profiler - look for SSID line specifically
-    if [[ -z "$ssid" ]]; then
-        ssid=$(system_profiler SPAirPortDataType 2>/dev/null | awk -F': ' '/Current Network Information:/{found=1} found && /^ +[A-Za-z]/{print $1; exit}' | xargs)
+    # Check against target router IP
+    if [[ "$current_router" == "$TARGET_ROUTER" ]]; then
+        return 0
     fi
 
-    # Method 4: wdutil (macOS 14.4+)
-    if [[ -z "$ssid" ]]; then
-        ssid=$(wdutil info 2>/dev/null | awk -F': ' '/SSID/{print $2; exit}' | xargs)
+    # Also check against IP subnet pattern if configured
+    local target_subnet
+    target_subnet=$(jq -r '.target_subnet // ""' "$CONFIG_FILE")
+    if [[ -n "$target_subnet" ]]; then
+        local current_ip
+        current_ip=$(networksetup -getinfo Wi-Fi 2>/dev/null | awk -F': ' '/^IP address:/{print $2}')
+        if [[ "$current_ip" == $target_subnet ]]; then
+            return 0
+        fi
     fi
 
-    echo "$ssid"
+    return 1
 }
 
 # ── Tailscale State Management ─────────────────────────────────────────
@@ -101,7 +120,7 @@ start_tailscale() {
         return 0
     fi
 
-    log "Starting Tailscale (connected to '$TARGET_SSID')..."
+    log "Starting Tailscale (on target network, router: $TARGET_ROUTER)..."
 
     # Bring Tailscale up with configured args
     "$TAILSCALE_CLI" up $TAILSCALE_UP_ARGS 2>&1 | while read -r line; do log "  tailscale: $line"; done
@@ -127,7 +146,7 @@ stop_tailscale() {
         return 0
     fi
 
-    log "Stopping Tailscale (disconnected from '$TARGET_SSID')..."
+    log "Stopping Tailscale (not on target network)..."
     "$TAILSCALE_CLI" down 2>&1 | while read -r line; do log "  tailscale: $line"; done
 
     echo "stopped" > "$STATE_FILE"
@@ -136,10 +155,7 @@ stop_tailscale() {
 
 # ── Core Logic ─────────────────────────────────────────────────────────
 check_and_toggle() {
-    local current_ssid
-    current_ssid=$(get_current_ssid)
-
-    if [[ "$current_ssid" == "$TARGET_SSID" ]]; then
+    if is_on_target_network; then
         start_tailscale
     else
         stop_tailscale
@@ -150,14 +166,20 @@ check_and_toggle() {
 show_status() {
     load_config
 
-    local current_ssid ts_status
-    current_ssid=$(get_current_ssid)
+    local current_router ts_status on_target
+    current_router=$(get_current_router)
     ts_status=$(get_tailscale_status)
 
+    if is_on_target_network; then
+        on_target="YES"
+    else
+        on_target="NO"
+    fi
+
     echo "=== Tailscale WiFi Monitor Status ==="
-    echo "Target SSID:     $TARGET_SSID"
-    echo "Current SSID:    ${current_ssid:-<not connected>}"
-    echo "On target WiFi:  $( [[ "$current_ssid" == "$TARGET_SSID" ]] && echo "YES" || echo "NO" )"
+    echo "Target network:  ${TARGET_SSID:-Takeda Guest} (router: $TARGET_ROUTER)"
+    echo "Current router:  ${current_router:-<not connected>}"
+    echo "On target WiFi:  $on_target"
     echo "Tailscale:       $ts_status"
     echo "Tailscale CLI:   $TAILSCALE_CLI"
     echo "Log file:        $LOG_FILE"
