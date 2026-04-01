@@ -4,7 +4,7 @@
   "target_subnet": "10.5.*",
 
   "tailscale_cli": "/Applications/Tailscale.app/Contents/MacOS/Tailscale",
-  "tailscale_up_args": "--exit-node-allow-lan-access",
+  "tailscale_up_args": "",
   "exit_node": "tetra-exitnode2",
 
   "tailscale_instance": "default"

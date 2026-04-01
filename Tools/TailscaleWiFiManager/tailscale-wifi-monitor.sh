@@ -122,15 +122,15 @@ start_tailscale() {
 
     log "Starting Tailscale (on target network, router: $TARGET_ROUTER)..."
 
-    # Bring Tailscale up with configured args
-    "$TAILSCALE_CLI" up $TAILSCALE_UP_ARGS 2>&1 | while read -r line; do log "  tailscale: $line"; done
+    # Bring Tailscale up (no flags - just connect)
+    "$TAILSCALE_CLI" up 2>&1 | while read -r line; do log "  tailscale: $line"; done
 
-    # If an exit node is configured, set it
+    # Set exit node and LAN access together
     local exit_node
     exit_node=$(jq -r '.exit_node // ""' "$CONFIG_FILE")
     if [[ -n "$exit_node" ]]; then
-        log "Setting exit node: $exit_node"
-        "$TAILSCALE_CLI" set --exit-node="$exit_node" 2>&1 | while read -r line; do log "  tailscale: $line"; done
+        log "Setting exit node: $exit_node (with LAN access)"
+        "$TAILSCALE_CLI" set --exit-node="$exit_node" --exit-node-allow-lan-access 2>&1 | while read -r line; do log "  tailscale: $line"; done
     fi
 
     echo "running" > "$STATE_FILE"
