@@ -5,7 +5,7 @@
 
   "tailscale_up_args": "--exit-node-allow-lan-access",
 
-  "exit_node": "",
+  "exit_node": "tetra-exitnode2",
 
   "tailscale_instance": "default"
 }
