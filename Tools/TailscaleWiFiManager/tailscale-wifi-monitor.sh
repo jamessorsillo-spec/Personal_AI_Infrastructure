@@ -56,13 +56,28 @@ log() {
 
 # ── Get Current WiFi SSID (macOS) ─────────────────────────────────────
 get_current_ssid() {
-    # macOS 14+ (Sonoma and later)
-    local ssid
-    ssid=$(networksetup -getairportnetwork en0 2>/dev/null | sed 's/Current Wi-Fi Network: //' | sed 's/You are not associated with an AirPort network.//')
+    local ssid=""
 
+    # Method 1: networksetup (most common)
+    local raw
+    raw=$(networksetup -getairportnetwork en0 2>/dev/null)
+    if [[ "$raw" == "Current Wi-Fi Network: "* ]]; then
+        ssid="${raw#Current Wi-Fi Network: }"
+    fi
+
+    # Method 2: ipconfig getpacket (gets SSID from DHCP info)
     if [[ -z "$ssid" ]]; then
-        # Fallback: try system_profiler
-        ssid=$(system_profiler SPAirPortDataType 2>/dev/null | grep -m1 "Current Network Information:" -A2 | tail -1 | xargs | sed 's/://')
+        ssid=$(ipconfig getsummary en0 2>/dev/null | awk -F': ' '/SSID :/{print $2}')
+    fi
+
+    # Method 3: system_profiler - look for SSID line specifically
+    if [[ -z "$ssid" ]]; then
+        ssid=$(system_profiler SPAirPortDataType 2>/dev/null | awk -F': ' '/Current Network Information:/{found=1} found && /^ +[A-Za-z]/{print $1; exit}' | xargs)
+    fi
+
+    # Method 4: wdutil (macOS 14.4+)
+    if [[ -z "$ssid" ]]; then
+        ssid=$(wdutil info 2>/dev/null | awk -F': ' '/SSID/{print $2; exit}' | xargs)
     fi
 
     echo "$ssid"
