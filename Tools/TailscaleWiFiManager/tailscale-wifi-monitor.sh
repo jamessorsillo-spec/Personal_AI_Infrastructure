@@ -88,10 +88,15 @@ start_tailscale() {
 
     log "Starting Tailscale (connected to '$TARGET_SSID')..."
 
-    if [[ -n "$TAILSCALE_UP_ARGS" ]]; then
-        "$TAILSCALE_CLI" up $TAILSCALE_UP_ARGS 2>&1 | while read -r line; do log "  tailscale: $line"; done
-    else
-        "$TAILSCALE_CLI" up 2>&1 | while read -r line; do log "  tailscale: $line"; done
+    # Bring Tailscale up with configured args
+    "$TAILSCALE_CLI" up $TAILSCALE_UP_ARGS 2>&1 | while read -r line; do log "  tailscale: $line"; done
+
+    # If an exit node is configured, set it
+    local exit_node
+    exit_node=$(jq -r '.exit_node // ""' "$CONFIG_FILE")
+    if [[ -n "$exit_node" ]]; then
+        log "Setting exit node: $exit_node"
+        "$TAILSCALE_CLI" set --exit-node="$exit_node" 2>&1 | while read -r line; do log "  tailscale: $line"; done
     fi
 
     echo "running" > "$STATE_FILE"
@@ -226,6 +231,69 @@ run_daemon() {
     done
 }
 
+# ── Detect Tailscale Installation ──────────────────────────────────────
+detect_tailscale() {
+    echo "=== Detecting Tailscale Installations ==="
+    echo ""
+
+    # Check common locations
+    local found=0
+    local locations=(
+        "/Applications/Tailscale.app/Contents/MacOS/Tailscale"
+        "/opt/homebrew/bin/tailscale"
+        "/usr/local/bin/tailscale"
+    )
+
+    # Also check for multiple Tailscale*.app
+    while IFS= read -r -d '' app; do
+        local cli="${app}/Contents/MacOS/Tailscale"
+        # Add if not already in locations
+        local already=0
+        for loc in "${locations[@]}"; do
+            [[ "$loc" == "$cli" ]] && already=1 && break
+        done
+        [[ $already -eq 0 ]] && locations+=("$cli")
+    done < <(find /Applications -maxdepth 1 -name "Tailscale*.app" -print0 2>/dev/null)
+
+    for cli in "${locations[@]}"; do
+        if [[ -x "$cli" ]]; then
+            found=$((found + 1))
+            echo "[$found] FOUND: $cli"
+            if "$cli" status &>/dev/null; then
+                echo "    Status: RUNNING"
+                # Show exit node info
+                local exit_info
+                exit_info=$("$cli" status 2>/dev/null | head -20)
+                echo "    ---"
+                echo "$exit_info" | sed 's/^/    /'
+                echo "    ---"
+                # Show current exit node if any
+                local exit_node
+                exit_node=$("$cli" exit-node list 2>/dev/null | grep 'selected' || true)
+                if [[ -n "$exit_node" ]]; then
+                    echo "    Exit node: $exit_node"
+                fi
+            else
+                echo "    Status: STOPPED / NOT CONNECTED"
+            fi
+            echo ""
+        fi
+    done
+
+    if [[ $found -eq 0 ]]; then
+        echo "No Tailscale installations found."
+        echo "Check if Tailscale is installed at a custom location."
+    else
+        echo "Found $found installation(s)."
+        echo ""
+        echo "To configure, set 'tailscale_cli' in config.json to the RUNNING instance's path."
+        echo "To capture your current exit node, run:"
+        echo "  /Applications/Tailscale.app/Contents/MacOS/Tailscale exit-node list 2>/dev/null | grep selected"
+        echo ""
+        echo "Then set 'exit_node' in config.json to that node's hostname."
+    fi
+}
+
 # ── Main ───────────────────────────────────────────────────────────────
 case "${1:-}" in
     --daemon)
@@ -233,6 +301,9 @@ case "${1:-}" in
         ;;
     --status)
         show_status
+        ;;
+    --detect)
+        detect_tailscale
         ;;
     --install)
         load_config
@@ -248,6 +319,7 @@ case "${1:-}" in
         echo "  $0              Run once (check and toggle)"
         echo "  $0 --daemon     Run continuously (polling mode)"
         echo "  $0 --status     Show current state"
+        echo "  $0 --detect     Find Tailscale installations and active exit node"
         echo "  $0 --install    Install macOS LaunchAgent (recommended)"
         echo "  $0 --uninstall  Remove LaunchAgent"
         echo ""
