@@ -65,6 +65,12 @@ If this directory exists, load and apply any PREFERENCES.md, configurations, or 
 - User needs to work with Excel tables, charts, or pivot tables
 - User wants to convert spreadsheets to/from other formats
 
+### Google Slides
+- User wants to read or extract content from Google Slides presentations
+- User provides a Google Slides URL (docs.google.com/presentation)
+- User mentions "Google Slides", "Google presentation", or "gslides"
+- User wants speaker notes or structured text from a cloud-hosted presentation
+
 ## Workflow Routing
 
 | Request Pattern | Route To |
@@ -75,6 +81,7 @@ If this directory exists, load and apply any PREFERENCES.md, configurations, or 
 | PDF, create PDF, merge PDF, split PDF, extract text from PDF, fill form | `Pdf/SKILL.md` |
 | Presentation, PPTX, slides, PowerPoint, speaker notes | `Pptx/SKILL.md` |
 | Spreadsheet, XLSX, Excel, formulas, financial model, data analysis | `Xlsx/SKILL.md` |
+| Google Slides, read google slides, google presentation, gslides, extract google slides | `GoogleSlides/SKILL.md` |
 
 ## Document Type Details
 
@@ -208,6 +215,27 @@ This skill organizes document processing across 4 document types plus specialize
 - Error detection and validation
 - Preserve formatting and formulas when editing
 
+### Google Slides (Read-Only)
+
+**Reference Documentation:**
+- `GoogleSlides/SKILL.md` - Complete Google Slides reading guide
+
+**Routing Logic:**
+- "Read Google Slides", "extract Google Slides content" → Read workflow (markdown)
+- "Google Slides to JSON", "structured extraction" → JSON workflow
+- "Get speaker notes from Google Slides" → Notes extraction
+
+**Supporting Resources:**
+- Scripts: `~/.claude/skills/Utilities/Documents/GoogleSlides/Scripts/`
+
+**Key Capabilities:**
+- Read presentations via Google Slides API v1
+- Extract text with formatting (fonts, colors, alignment, bullets)
+- Extract speaker notes per slide
+- Output as markdown or structured JSON
+- Supports API key, OAuth token, and service account authentication
+- Parse table content from slides
+
 ## 📋 Document Processing Principles
 
 ### DOCX Best Practices
@@ -327,6 +355,10 @@ User: "Create a consulting report from the assessment data"
 - Main Guide: `~/.claude/skills/Utilities/Documents/Xlsx/SKILL.md`
 - Recalc Script: `~/.claude/skills/Utilities/Documents/Xlsx/recalc.py`
 
+**Google Slides (Read-Only):**
+- Main Guide: `~/.claude/skills/Utilities/Documents/GoogleSlides/SKILL.md`
+- Reader Script: `~/.claude/skills/Utilities/Documents/GoogleSlides/Scripts/read.ts`
+
 ---
 
 ## Summary
@@ -337,6 +369,7 @@ User: "Create a consulting report from the assessment data"
 - **PDF** - Create, manipulate, extract from PDFs with form filling capabilities
 - **PPTX** - Create, edit presentations with professional design and templates
 - **XLSX** - Create, edit spreadsheets with formulas and financial modeling
+- **Google Slides** - Read and extract content from Google Slides presentations via API
 
 **Reference-based organization** - Each document type has complete guides and tooling
 
