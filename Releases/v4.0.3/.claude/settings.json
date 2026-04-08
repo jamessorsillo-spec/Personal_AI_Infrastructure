@@ -905,13 +905,40 @@
     "cloudflare": {
       "url": "https://mcp.cloudflare.com/mcp"
     },
-    "google-workspace": {
+    "gmail-tetrascience": {
+      "command": "uvx",
+      "args": ["workspace-mcp"],
+      "env": {
+        "GOOGLE_OAUTH_CLIENT_ID": "{GOOGLE_OAUTH_CLIENT_ID}",
+        "GOOGLE_OAUTH_CLIENT_SECRET": "{GOOGLE_OAUTH_CLIENT_SECRET}",
+        "USER_GOOGLE_EMAIL": "jorsillo@tetrascience.com"
+      }
+    },
+    "gmail-underscore": {
       "command": "uvx",
       "args": ["workspace-mcp"],
       "env": {
         "GOOGLE_OAUTH_CLIENT_ID": "{GOOGLE_OAUTH_CLIENT_ID}",
         "GOOGLE_OAUTH_CLIENT_SECRET": "{GOOGLE_OAUTH_CLIENT_SECRET}",
         "USER_GOOGLE_EMAIL": "james@underscore.vc"
+      }
+    },
+    "gmail-personal": {
+      "command": "uvx",
+      "args": ["workspace-mcp"],
+      "env": {
+        "GOOGLE_OAUTH_CLIENT_ID": "{GOOGLE_OAUTH_CLIENT_ID}",
+        "GOOGLE_OAUTH_CLIENT_SECRET": "{GOOGLE_OAUTH_CLIENT_SECRET}",
+        "USER_GOOGLE_EMAIL": "james.s.orsillo@gmail.com"
+      }
+    },
+    "gmail-jimmyors": {
+      "command": "uvx",
+      "args": ["workspace-mcp"],
+      "env": {
+        "GOOGLE_OAUTH_CLIENT_ID": "{GOOGLE_OAUTH_CLIENT_ID}",
+        "GOOGLE_OAUTH_CLIENT_SECRET": "{GOOGLE_OAUTH_CLIENT_SECRET}",
+        "USER_GOOGLE_EMAIL": "jimmyors75@gmail.com"
       }
     }
   },
