@@ -25,7 +25,7 @@
  * - Skipped for subagents: Yes
  */
 
-import { readFileSync, existsSync, statSync } from 'fs';
+import { readFileSync, existsSync, statSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { getPaiDir } from './lib/paths';
 
@@ -89,18 +89,36 @@ async function main() {
     }
 
     const paiDir = getPaiDir();
-    const tasksFile = join(paiDir, 'MEMORY', 'TASKS', 'master-tasks.md');
+    const tasksDir = join(paiDir, 'MEMORY', 'TASKS');
+    const tasksFile = join(tasksDir, 'master-tasks.md');
 
-    if (!existsSync(tasksFile)) {
-      console.error('LoadAppleNotesTasks: no master-tasks.md found (run apple-notes-sync.sh to create)');
+    // Find all task markdown files (supports folder sync mode)
+    let taskFiles: string[] = [];
+    if (existsSync(tasksDir)) {
+      const entries = readdirSync(tasksDir).filter(
+        f => f.endsWith('.md') && f !== 'README.md'
+      );
+      taskFiles = entries.map(f => join(tasksDir, f));
+    }
+
+    if (taskFiles.length === 0) {
+      console.error('LoadAppleNotesTasks: no task files found (run apple-notes-sync.sh to create)');
       process.exit(0);
     }
 
-    const content = readFileSync(tasksFile, 'utf-8');
+    // Use master-tasks.md as primary if it exists, otherwise first file
+    const primaryFile = taskFiles.includes(tasksFile) ? tasksFile : taskFiles[0];
+    const content = readFileSync(primaryFile, 'utf-8');
     if (!content.trim()) {
-      console.error('LoadAppleNotesTasks: master-tasks.md is empty');
+      console.error('LoadAppleNotesTasks: primary task file is empty');
       process.exit(0);
     }
+
+    // If there are additional synced notes beyond the primary, note them
+    const additionalFiles = taskFiles.filter(f => f !== primaryFile);
+    const additionalNote = additionalFiles.length > 0
+      ? `\n*${additionalFiles.length} additional synced note(s) in MEMORY/TASKS/*`
+      : '';
 
     const { meta, body } = parseFrontmatter(content);
     const { total, done, open } = countTasks(body);
@@ -126,23 +144,71 @@ async function main() {
       truncated = true;
     }
 
-    // Build the context injection
-    const header = [
-      `## Master Task List (from Apple Notes)`,
-      ``,
-      `Source: ${meta.note_name || 'Apple Notes'} | Synced: ${ageStr || meta.synced_at || 'unknown'}`,
-      total > 0 ? `Progress: ${done}/${total} complete (${open} open)` : '',
-      staleWarning,
-      ``
-    ].filter(Boolean).join('\n');
+    // Separate open and completed tasks for context efficiency
+    // Claude sessions primarily need OPEN tasks; completed is reference only
+    const lines = taskContent.split('\n');
+    const openLines: string[] = [];
+    const doneLines: string[] = [];
+    const otherLines: string[] = [];
+    let currentHeading = '';
+
+    for (const line of lines) {
+      if (/^#{1,4}\s/.test(line)) {
+        currentHeading = line;
+        continue;
+      }
+      if (/^- \[ \]/.test(line)) {
+        if (currentHeading && !openLines.includes(currentHeading)) {
+          openLines.push(currentHeading);
+        }
+        openLines.push(line);
+      } else if (/^- \[[xX]\]/.test(line)) {
+        if (currentHeading && !doneLines.includes(currentHeading)) {
+          doneLines.push(currentHeading);
+        }
+        doneLines.push(line);
+      } else if (line.trim()) {
+        otherLines.push(line);
+      }
+    }
+
+    // Build context — open tasks prominent, completed summarized
+    const openSection = openLines.length > 0
+      ? openLines.join('\n')
+      : '*No open tasks*';
+
+    // Only include first few completed tasks to save context space
+    const maxDoneShown = 10;
+    const doneShown = doneLines.filter(l => l.startsWith('- [')).slice(0, maxDoneShown);
+    const doneHidden = done - doneShown.length;
+    let doneSection = doneShown.length > 0
+      ? doneShown.join('\n')
+      : '*None*';
+    if (doneHidden > 0) {
+      doneSection += `\n*...and ${doneHidden} more completed tasks*`;
+    }
 
     const footer = truncated
-      ? '\n\n> *Task list truncated. Full list in ~/.claude/MEMORY/TASKS/master-tasks.md*'
+      ? '\n> *Task list truncated. Full list in ~/.claude/MEMORY/TASKS/master-tasks.md*'
       : '';
 
     console.log(`<system-reminder>
-${header}
-${taskContent}${footer}
+## Master Task List (from Apple Notes)
+
+Source: ${meta.note_name || 'Apple Notes'} | Synced: ${ageStr || meta.synced_at || 'unknown'} | ${open} open, ${done} done
+${staleWarning}
+
+### Open (${open})
+
+${openSection}
+
+### Completed (${done})
+
+${doneSection}
+${footer}
+---
+*To update: edit in Apple Notes → auto-syncs via LaunchAgent*
+*Full file: ~/.claude/MEMORY/TASKS/master-tasks.md*${additionalNote}
 </system-reminder>`);
 
     console.error(`LoadAppleNotesTasks: loaded ${total} tasks (${open} open, synced ${ageStr})`);
