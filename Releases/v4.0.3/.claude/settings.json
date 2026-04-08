@@ -216,6 +216,10 @@
           },
           {
             "type": "command",
+            "command": "${PAI_DIR}/hooks/LoadAppleNotesTasks.hook.ts"
+          },
+          {
+            "type": "command",
             "command": "bun ${PAI_DIR}/hooks/handlers/BuildCLAUDE.ts"
           }
         ]
