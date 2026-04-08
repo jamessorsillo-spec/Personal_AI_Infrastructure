@@ -172,14 +172,16 @@ NOTE_NAME="${NOTE_NAME:-$DEFAULT_NOTE}"
 
 read -p "  Apple Notes folder (leave blank for all): " NOTE_FOLDER
 
-read -p "  Auto git push after sync? (y/n) [y]: " -n 1 -r AUTO_PUSH
+read -p "  Auto git push after sync? (y/n) [y]: " -n 1 -r AUTO_PUSH_INPUT
 echo
-AUTO_PUSH=${AUTO_PUSH:-y}
+AUTO_PUSH=${AUTO_PUSH_INPUT:-y}
 
 INTERVAL_MIN=$((SYNC_INTERVAL / 60))
 read -p "  Sync interval in minutes [${INTERVAL_MIN}]: " CUSTOM_INTERVAL
-if [[ -n "$CUSTOM_INTERVAL" ]]; then
+if [[ -n "${CUSTOM_INTERVAL:-}" ]] && [[ "$CUSTOM_INTERVAL" =~ ^[0-9]+$ ]]; then
   SYNC_INTERVAL=$((CUSTOM_INTERVAL * 60))
+elif [[ -n "${CUSTOM_INTERVAL:-}" ]]; then
+  echo -e "  ${YELLOW}Not a number, using default (${INTERVAL_MIN} min)${NC}"
 fi
 
 # Save config
