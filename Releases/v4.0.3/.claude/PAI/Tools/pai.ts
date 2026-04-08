@@ -44,6 +44,9 @@ const MCP_SHORTCUTS: Record<string, string> = {
   apify: "Apify-MCP.json",
   cu: "ClickUp-MCP.json",
   clickup: "ClickUp-MCP.json",
+  gw: "GoogleWorkspace-MCP.json",
+  gmail: "GoogleWorkspace-MCP.json",
+  google: "GoogleWorkspace-MCP.json",
   chrome: "chrome-enabled.mcp.json",
   dev: "dev-work.mcp.json",
   sec: "security.mcp.json",
@@ -64,6 +67,7 @@ const PROFILE_DESCRIPTIONS: Record<string, string> = {
   security: "Security tools (httpx, naabu)",
   research: "Research tools (Brightdata, Apify, Chrome)",
   clickup: "Official ClickUp MCP (tasks, time tracking, docs)",
+  "google-workspace": "Google Workspace (Gmail, Calendar, Drive, Docs)",
   full: "All available MCPs",
 };
 
@@ -591,6 +595,7 @@ COMMANDS:
 MCP SHORTCUTS:
   bd, brightdata           Bright Data scraping
   ap, apify                Apify automation
+  gw, gmail, google        Google Workspace (Gmail, Calendar, Drive)
   cu, clickup              Official ClickUp (tasks, time tracking, docs)
   chrome                   Chrome DevTools
   dev                      Development tools
