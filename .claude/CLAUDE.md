@@ -82,14 +82,61 @@ The user will give these. Execute immediately, do not re-argue unless material r
 
 ## Batch Triage Flow
 
-When the user says "triage", "process inbox", "triage all", or similar:
+When the user says "triage", "process inbox", "triage all", or similar, present this menu:
 
-1. Ask which accounts (or default to all in priority order)
-2. For each account, fetch unread via `gmail_search_messages` with `is:unread`
-3. For each thread, read full thread via `gmail_read_thread`
-4. Present triage card (format above)
-5. Wait for command
-6. After all threads (or `stop`), show summary with counts by account and by state
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  EMAIL TRIAGE — Pick Your Mode
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1. HOT SCAN        (~5 min)   Last 48 hours, unread only
+  2. WEEK IN REVIEW   (~15 min)  Last 7 days, unread, full triage cards
+  3. DEEP SWEEP       (~30 min)  All unread, batch scan 20 at a time
+  4. INBOX ZERO       (~60 min)  Full one-by-one triage of everything
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ACCOUNTS:
+  [A] All (TetraScience → Underscore → Personal → Personal 2)
+  [T] TetraScience only
+  [U] Underscore VC only
+  [P] Personal only
+  [J] Personal 2 (jimmyors) only
+  — or combine: T+U, P+J, etc.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Example: "2 T" = Week in Review, TetraScience only
+           "1 A" = Hot Scan, all accounts
+           "3 T+U" = Deep Sweep, work accounts
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+Wait for the user to pick a mode + account(s), then execute:
+
+### Mode 1: HOT SCAN
+- Search: `is:unread in:inbox after:{2 days ago}` per account
+- Present full triage card for each thread
+- Fast — only the freshest items
+
+### Mode 2: WEEK IN REVIEW
+- Search: `is:unread in:inbox after:{7 days ago}` per account
+- Present full triage card for each thread
+- Good daily/weekly rhythm
+
+### Mode 3: DEEP SWEEP
+- Search: `is:unread in:inbox` per account (all unread)
+- Pull 20 subjects/senders at a time, display as a numbered list
+- User eyeballs and says which numbers to deep-triage (e.g., "3, 7, 12")
+- Everything else gets bulk-classified as ARCHIVE or REFERENCE
+- Repeat until all unread are processed
+
+### Mode 4: INBOX ZERO
+- Search: `is:unread in:inbox` per account (all unread)
+- Full triage card for every single thread, one by one, newest first
+- Most thorough but most time-consuming
+
+### After any mode completes (or user says `stop`):
+Show summary with counts by account and by state.
 
 ## Draft Reply Rules
 
