@@ -1,0 +1,21 @@
+{
+  "name": "A_DRAFT_EMAIL_REPLY",
+  "version": "1.0.0",
+  "description": "Draft an email reply based on triage context and user instruction. Produces concise, professional, direct replies without over-committing or inventing facts.",
+  "input": {
+    "thread": { "type": "string", "required": true },
+    "instruction": { "type": "string", "required": true },
+    "triage_state": { "type": "string" },
+    "sender": { "type": "string" },
+    "subject": { "type": "string" },
+    "tone": { "type": "string" }
+  },
+  "output": {
+    "draft_reply": { "type": "string" },
+    "draft_subject": { "type": "string" },
+    "notes": { "type": "string" }
+  },
+  "requires": ["llm"],
+  "tags": ["email", "draft", "reply", "productivity"],
+  "license": "MIT"
+}

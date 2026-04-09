@@ -1,0 +1,22 @@
+{
+  "name": "A_TRIAGE_EMAIL",
+  "version": "1.0.0",
+  "description": "Triage an email thread using a GTD framework. Classifies into DO-NOW, TASK, WAITING-FOR, REFERENCE, ARCHIVE, or REVIEW-REQUIRED. Returns classification, summary, recommended next action, and prepared artifact.",
+  "input": {
+    "thread": { "type": "string", "required": true },
+    "sender": { "type": "string" },
+    "subject": { "type": "string" },
+    "context": { "type": "string" }
+  },
+  "output": {
+    "triage_state": { "type": "string" },
+    "why_it_matters": { "type": "array" },
+    "recommended_action": { "type": "string" },
+    "prepared_output": { "type": "object" },
+    "risk_flags": { "type": "array" },
+    "commands": { "type": "array" }
+  },
+  "requires": ["llm"],
+  "tags": ["email", "triage", "gtd", "productivity"],
+  "license": "MIT"
+}

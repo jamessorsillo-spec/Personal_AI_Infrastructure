@@ -1,0 +1,10 @@
+{
+  "name": "arbol-a-triage-email",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-01-30",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {},
+  "placement": {
+    "mode": "smart"
+  }
+}
