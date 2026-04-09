@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "_comment": "MCP server configuration for 4 Gmail accounts. Add this to your Claude Code settings (Settings > MCP Servers) or merge into ~/.claude/settings.json under 'mcpServers'.",
+  "_security": "Client Secret must be set per-account via environment variable or OAuth token file. NEVER hardcode secrets.",
+
+  "gmail-tetrascience": {
+    "type": "google",
+    "service": "gmail",
+    "account": "jorsillo@tetrascience.com",
+    "label": "TetraScience (Work)",
+    "oauth": {
+      "clientId": "929663903371-cjvehlii4g3qiimk3tj35aom05qls45p.apps.googleusercontent.com",
+      "scopes": [
+        "https://www.googleapis.com/auth/gmail.readonly",
+        "https://www.googleapis.com/auth/gmail.compose",
+        "https://www.googleapis.com/auth/gmail.labels"
+      ]
+    }
+  },
+
+  "gmail-underscore": {
+    "type": "google",
+    "service": "gmail",
+    "account": "james@underscore.vc",
+    "label": "Underscore VC",
+    "oauth": {
+      "clientId": "929663903371-cjvehlii4g3qiimk3tj35aom05qls45p.apps.googleusercontent.com",
+      "scopes": [
+        "https://www.googleapis.com/auth/gmail.readonly",
+        "https://www.googleapis.com/auth/gmail.compose",
+        "https://www.googleapis.com/auth/gmail.labels"
+      ]
+    }
+  },
+
+  "gmail-personal": {
+    "type": "google",
+    "service": "gmail",
+    "account": "james.s.orsillo@gmail.com",
+    "label": "Personal",
+    "oauth": {
+      "clientId": "929663903371-cjvehlii4g3qiimk3tj35aom05qls45p.apps.googleusercontent.com",
+      "scopes": [
+        "https://www.googleapis.com/auth/gmail.readonly",
+        "https://www.googleapis.com/auth/gmail.compose",
+        "https://www.googleapis.com/auth/gmail.labels"
+      ]
+    }
+  },
+
+  "gmail-jimmyors": {
+    "type": "google",
+    "service": "gmail",
+    "account": "jimmyors75@gmail.com",
+    "label": "Personal 2",
+    "oauth": {
+      "clientId": "929663903371-cjvehlii4g3qiimk3tj35aom05qls45p.apps.googleusercontent.com",
+      "scopes": [
+        "https://www.googleapis.com/auth/gmail.readonly",
+        "https://www.googleapis.com/auth/gmail.compose",
+        "https://www.googleapis.com/auth/gmail.labels"
+      ]
+    }
+  }
+}

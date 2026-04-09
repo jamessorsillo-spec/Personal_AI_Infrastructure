@@ -40,6 +40,17 @@ Default inbox processing order (highest priority first):
 3. `gmail-personal` — Personal
 4. `gmail-jimmyors` — Personal 2
 
+## OAuth / Google Cloud Project
+
+- **Project Name:** PAI Chief of Staff
+- **Org:** underscore.vc
+- **Audience:** External
+- **Mode:** Testing
+- **Client ID:** 929663903371-cjvehlii4g3qiimk3tj35aom05qls45p.apps.googleusercontent.com
+- **Client Secret:** Stored in `.env` — NEVER commit to repo. Set via `GOOGLE_CLIENT_SECRET` env var.
+
+All 4 accounts authenticate through this single OAuth app.
+
 ## Email Triage Tool
 
 See `~/Personal_AI_Infrastructure/Tools/EmailTriageCopilot/` for the GTD-based triage system with cloud API and PAI skill.
