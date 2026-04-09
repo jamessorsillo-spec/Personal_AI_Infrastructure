@@ -1,6 +1,6 @@
 # BatchTriage Workflow
 
-Process multiple emails in sequence using the GTD triage framework.
+Process multiple emails across multiple accounts using the GTD triage framework.
 
 ## Voice Notification
 
@@ -11,14 +11,40 @@ curl -s -X POST http://localhost:8888/notify \
   > /dev/null 2>&1 &
 ```
 
+## Connected Accounts
+
+Four Gmail accounts are available via MCP. See `accounts.json` or `~/.claude/PAI/USER/WORK/EMAIL.md` for full config.
+
+| Server | Account | Context | Priority |
+|--------|---------|---------|----------|
+| `gmail-tetrascience` | jorsillo@tetrascience.com | Work (TetraScience) | 1 |
+| `gmail-underscore` | james@underscore.vc | Underscore VC | 2 |
+| `gmail-personal` | james.s.orsillo@gmail.com | Personal | 3 |
+| `gmail-jimmyors` | jimmyors75@gmail.com | Personal 2 | 4 |
+
 ## Step 1: Fetch Emails
 
-If Gmail MCP tools are available:
-- Use `gmail_search_messages` with query `is:unread` (or user-specified query)
-- Fetch up to 20 threads at a time
-- For each result, use `gmail_read_thread` to get full thread content
+### Multi-Account Mode (default)
 
-If no Gmail MCP:
+Process accounts in priority order. For each account:
+1. Use that account's MCP server `gmail_search_messages` with query `is:unread`
+2. Fetch up to 20 threads per account
+3. For each result, use `gmail_read_thread` to get full thread content
+4. Tag each thread with its source account for context
+
+**Account selection:**
+- `process inbox` / `triage all` → All accounts in priority order
+- `triage work` / `triage tetrascience` → TetraScience only
+- `triage underscore` / `triage vc` → Underscore VC only
+- `triage personal` → Personal only
+- `triage jimmyors` → Personal 2 only
+
+### Single Account Mode
+
+User specifies which account: "triage my TetraScience inbox"
+
+### No Gmail MCP
+
 - Ask user to paste emails one at a time
 - Or accept a batch of emails in structured format
 
@@ -31,10 +57,11 @@ For each thread, run the full Triage workflow:
 
 ## Step 3: Present Triage Card
 
-For each email, show a compact triage card:
+For each email, show a compact triage card with account badge:
 
 ```
 [1/12] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ACCOUNT: [TetraScience | Underscore VC | Personal | Personal 2]
 
 From: [sender]
 Subject: [subject]
@@ -46,7 +73,7 @@ NEXT: [recommended action]
 
 PREPARED: [short artifact preview]
 
-> reply | task | waiting for | archive | reference | skip | stop
+> reply | task | waiting for | archive | reference | skip | stop | next account
 ```
 
 ## Step 4: Process User Command
@@ -68,14 +95,23 @@ After all emails are processed (or user stops), show a summary:
 ```
 BATCH TRIAGE COMPLETE
 
-Processed: 12 threads
-- DO-NOW: 3 (replies drafted)
-- TASK: 4 (tasks proposed)
-- WAITING-FOR: 2 (follow-ups set)
-- REFERENCE: 1
-- ARCHIVE: 2
-- REVIEW-REQUIRED: 0
-- Skipped: 0
+Accounts processed: 4
+Total threads: 37
+
+By account:
+  TetraScience:   15 threads
+  Underscore VC:   8 threads
+  Personal:       10 threads
+  Personal 2:      4 threads
+
+By state:
+  DO-NOW: 5 (replies drafted)
+  TASK: 12 (tasks proposed)
+  WAITING-FOR: 6 (follow-ups set)
+  REFERENCE: 4
+  ARCHIVE: 8
+  REVIEW-REQUIRED: 2
+  Skipped: 0
 
 Pending actions requiring your approval:
 1. [list any drafts, tasks, follow-ups awaiting confirmation]

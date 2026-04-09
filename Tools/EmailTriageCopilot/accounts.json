@@ -1,0 +1,33 @@
+{
+  "accounts": [
+    {
+      "id": "tetrascience",
+      "server": "gmail-tetrascience",
+      "email": "jorsillo@tetrascience.com",
+      "context": "Work (TetraScience)",
+      "priority": 1
+    },
+    {
+      "id": "underscore",
+      "server": "gmail-underscore",
+      "email": "james@underscore.vc",
+      "context": "Underscore VC",
+      "priority": 2
+    },
+    {
+      "id": "personal",
+      "server": "gmail-personal",
+      "email": "james.s.orsillo@gmail.com",
+      "context": "Personal",
+      "priority": 3
+    },
+    {
+      "id": "jimmyors",
+      "server": "gmail-jimmyors",
+      "email": "jimmyors75@gmail.com",
+      "context": "Personal 2",
+      "priority": 4
+    }
+  ],
+  "defaultTriageOrder": ["tetrascience", "underscore", "personal", "jimmyors"]
+}
