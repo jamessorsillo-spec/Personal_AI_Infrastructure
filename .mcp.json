@@ -1,0 +1,36 @@
+{
+  "mcpServers": {
+    "gmail-tetrascience": {
+      "command": "bunx",
+      "args": ["@shinzolabs/gmail-mcp"],
+      "env": {
+        "GMAIL_CREDENTIALS_PATH": "~/.gmail-mcp/tetrascience/credentials.json",
+        "GMAIL_OAUTH_PATH": "~/.gmail-mcp/gcp-oauth.keys.json"
+      }
+    },
+    "gmail-underscore": {
+      "command": "bunx",
+      "args": ["@shinzolabs/gmail-mcp"],
+      "env": {
+        "GMAIL_CREDENTIALS_PATH": "~/.gmail-mcp/underscore/credentials.json",
+        "GMAIL_OAUTH_PATH": "~/.gmail-mcp/gcp-oauth.keys.json"
+      }
+    },
+    "gmail-personal": {
+      "command": "bunx",
+      "args": ["@shinzolabs/gmail-mcp"],
+      "env": {
+        "GMAIL_CREDENTIALS_PATH": "~/.gmail-mcp/personal/credentials.json",
+        "GMAIL_OAUTH_PATH": "~/.gmail-mcp/gcp-oauth.keys.json"
+      }
+    },
+    "gmail-jimmyors": {
+      "command": "bunx",
+      "args": ["@shinzolabs/gmail-mcp"],
+      "env": {
+        "GMAIL_CREDENTIALS_PATH": "~/.gmail-mcp/jimmyors/credentials.json",
+        "GMAIL_OAUTH_PATH": "~/.gmail-mcp/gcp-oauth.keys.json"
+      }
+    }
+  }
+}
