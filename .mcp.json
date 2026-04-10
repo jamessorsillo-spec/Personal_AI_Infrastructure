@@ -1,0 +1,60 @@
+{
+  "mcpServers": {
+    "gmail-tetrascience": {
+      "type": "google",
+      "service": "gmail",
+      "account": "jorsillo@tetrascience.com",
+      "label": "TetraScience (Work)",
+      "oauth": {
+        "clientId": "929663903371-cjvehlii4g3qiimk3tj35aom05qls45p.apps.googleusercontent.com",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.readonly",
+          "https://www.googleapis.com/auth/gmail.compose",
+          "https://www.googleapis.com/auth/gmail.labels"
+        ]
+      }
+    },
+    "gmail-underscore": {
+      "type": "google",
+      "service": "gmail",
+      "account": "james@underscore.vc",
+      "label": "Underscore VC",
+      "oauth": {
+        "clientId": "929663903371-cjvehlii4g3qiimk3tj35aom05qls45p.apps.googleusercontent.com",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.readonly",
+          "https://www.googleapis.com/auth/gmail.compose",
+          "https://www.googleapis.com/auth/gmail.labels"
+        ]
+      }
+    },
+    "gmail-personal": {
+      "type": "google",
+      "service": "gmail",
+      "account": "james.s.orsillo@gmail.com",
+      "label": "Personal",
+      "oauth": {
+        "clientId": "929663903371-cjvehlii4g3qiimk3tj35aom05qls45p.apps.googleusercontent.com",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.readonly",
+          "https://www.googleapis.com/auth/gmail.compose",
+          "https://www.googleapis.com/auth/gmail.labels"
+        ]
+      }
+    },
+    "gmail-jimmyors": {
+      "type": "google",
+      "service": "gmail",
+      "account": "jimmyors75@gmail.com",
+      "label": "Personal 2",
+      "oauth": {
+        "clientId": "929663903371-cjvehlii4g3qiimk3tj35aom05qls45p.apps.googleusercontent.com",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.readonly",
+          "https://www.googleapis.com/auth/gmail.compose",
+          "https://www.googleapis.com/auth/gmail.labels"
+        ]
+      }
+    }
+  }
+}
