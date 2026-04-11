@@ -4,28 +4,28 @@
       "command": "bunx",
       "args": ["@shinzolabs/gmail-mcp"],
       "env": {
-        "MCP_CONFIG_DIR": "~/.gmail-mcp/tetrascience"
+        "MCP_CONFIG_DIR": "/Users/jimmyorsillo/.gmail-mcp/tetrascience"
       }
     },
     "gmail-underscore": {
       "command": "bunx",
       "args": ["@shinzolabs/gmail-mcp"],
       "env": {
-        "MCP_CONFIG_DIR": "~/.gmail-mcp/underscore"
+        "MCP_CONFIG_DIR": "/Users/jimmyorsillo/.gmail-mcp/underscore"
       }
     },
     "gmail-personal": {
       "command": "bunx",
       "args": ["@shinzolabs/gmail-mcp"],
       "env": {
-        "MCP_CONFIG_DIR": "~/.gmail-mcp/personal"
+        "MCP_CONFIG_DIR": "/Users/jimmyorsillo/.gmail-mcp/personal"
       }
     },
     "gmail-jimmyors": {
       "command": "bunx",
       "args": ["@shinzolabs/gmail-mcp"],
       "env": {
-        "MCP_CONFIG_DIR": "~/.gmail-mcp/jimmyors"
+        "MCP_CONFIG_DIR": "/Users/jimmyorsillo/.gmail-mcp/jimmyors"
       }
     }
   }
